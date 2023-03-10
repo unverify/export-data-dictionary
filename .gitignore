@@ -1,0 +1,4 @@
+*.pyc
+*.xlsx
+.venv
+configs.py
