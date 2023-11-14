@@ -30,11 +30,14 @@ class MySQLConnector:
             query_schema = f'''
             SELECT
                 table_name,
+                ordinal_position,
                 column_name,
                 column_type,
+                character_maximum_length,
                 is_nullable,
                 extra,
-                column_comment
+                column_comment,
+                column_default
             FROM
                 information_schema.COLUMNS
             WHERE
@@ -43,7 +46,6 @@ class MySQLConnector:
                 table_name,
                 ordinal_position ASC;
             '''
-
         # execute SQL query using execute() method.
         cursor.execute(query_schema)
 
@@ -54,17 +56,21 @@ class MySQLConnector:
         connection.close()
         return results
 
-    def get_schema(self):
+    def get_schema(self,):
+
         result = self.query_schema()
         table_name = {}
         for row in result:
-            table, column_name, column_type, is_nullable, extra, column_comment = row
+            table, ordinal, column_name, column_type, max_length, is_nullable, extra, column_comment, column_default = row
             table_schema = {
+                'ordinal': ordinal,
                 'column_name': column_name,
                 'column_type': column_type,
+                'max_length': max_length if max_length else '',
                 'is_nullable': is_nullable,
                 'extra': extra,
                 'column_comment': column_comment,
+                'column_default': column_default if column_default else '',
             }
             if table in table_name:
                 table_name[table].append(table_schema)
