@@ -47,7 +47,7 @@ class ExportDataDictionary(Workbook):
 
     def __init__(self, filename: str):
         super().__init__(filename)
-        self._worksheet: Worksheet = self.add_worksheet(name='Data Dictionary')
+        self._worksheet: Worksheet = None
         self._bold = self.add_format({'bold': 1})
         self._row = 0
         self._col = 0
@@ -75,20 +75,40 @@ class ExportDataDictionary(Workbook):
         self._row += 1
 
     def create_table(self, table_name: str, schema: list):
-        self._worksheet.write_string(self._row, self._col, table_name, self._bold)
+        self._worksheet.write_string(self._row, self._col, 'Table:', self._bold)
+        self._worksheet.write_string(self._row, self._col+1, table_name, self._bold)
         self._row += 1
-        self.write_header(['Column Name', 'Column Type', 'Is Nullable', 'Extra', 'Column Comment'])
-        for column in schema:
-            self._worksheet.write_string(self._row, self._col, column['column_name'])
-            self._worksheet.write_string(self._row, self._col + 1, column['column_type'])
-            self._worksheet.write_string(self._row, self._col + 2, column['is_nullable'])
-            self._worksheet.write_string(self._row, self._col + 3, column['extra'])
-            self._worksheet.write_string(self._row, self._col + 4, column['column_comment'])
+        self._worksheet.write_string(self._row, self._col, 'Description:', self._bold)
+        self._row += 1
+        self.write_header(['COLUMN_ID', 'COLUMN_NAME', 'DESCRIPTION', 'DATA_TYPE', 'DATA_LENGTH', 'NULLABLE', 'Key Type'])
+        for index, column in enumerate(schema):
+            self._worksheet.write_string(self._row, self._col, str(index + 1))
+            self._worksheet.write_string(self._row, self._col + 1, column['column_name'])
+            self._worksheet.write_string(self._row, self._col + 2, column['column_comment'])
+            self._worksheet.write_string(self._row, self._col + 3, column['column_type'])
+            self._worksheet.write_string(self._row, self._col + 4, column['column_type'])
+            self._worksheet.write_string(self._row, self._col + 5, column['is_nullable'])
+            self._worksheet.write_string(self._row, self._col + 6, column['extra'])
             self._row += 1
-        self._row += 1
+        self._row += 2
 
-    def generate_xlsx(self, data: dict):
+    def generate_xlsx_simple(self, data: dict):
+        self._worksheet: Worksheet = self.add_worksheet(name='Data Dictionary')
         for table_name, schema in data.items():
             print(f'Generating {table_name}...')
+            self.create_table(table_name, schema)
+        self.close()
+
+    def generate_xlsx(self, data: dict):
+        next_app = ''
+        for table_name, schema in data.items():
+            table_name_raw = table_name.split('_')
+            app_name = table_name_raw[0]
+            if next_app != app_name:
+                self._worksheet: Worksheet = self.add_worksheet(name=app_name)
+                self._row = 0
+                self._col = 0
+                next_app = app_name
+            print(f'Generating app_name={app_name} {table_name}...')
             self.create_table(table_name, schema)
         self.close()
