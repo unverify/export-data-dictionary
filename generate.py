@@ -48,7 +48,8 @@ class ExportDataDictionary(Workbook):
     def __init__(self, filename: str):
         super().__init__(filename)
         self._worksheet: Worksheet = None
-        self._bold = self.add_format({'bold': 1})
+        self._bold = self.add_format({'bold': 1, 'border': 1})
+        self._border = self.add_format({'border': 1})
         self._row = 0
         self._col = 0
 
@@ -82,13 +83,13 @@ class ExportDataDictionary(Workbook):
         self._row += 1
         self.write_header(['COLUMN_ID', 'COLUMN_NAME', 'DESCRIPTION', 'DATA_TYPE', 'DATA_LENGTH', 'NULLABLE', 'Key Type'])
         for index, column in enumerate(schema):
-            self._worksheet.write_string(self._row, self._col, str(index + 1))
-            self._worksheet.write_string(self._row, self._col + 1, column['column_name'])
-            self._worksheet.write_string(self._row, self._col + 2, column['column_comment'])
-            self._worksheet.write_string(self._row, self._col + 3, column['column_type'])
-            self._worksheet.write_string(self._row, self._col + 4, column['column_type'])
-            self._worksheet.write_string(self._row, self._col + 5, column['is_nullable'])
-            self._worksheet.write_string(self._row, self._col + 6, column['extra'])
+            self._worksheet.write_string(self._row, self._col, str(index + 1), self._border)
+            self._worksheet.write_string(self._row, self._col + 1, column['column_name'], self._border)
+            self._worksheet.write_string(self._row, self._col + 2, column['column_comment'], self._border)
+            self._worksheet.write_string(self._row, self._col + 3, column['column_type'], self._border)
+            self._worksheet.write_string(self._row, self._col + 4, str(column['max_length']), self._border)
+            self._worksheet.write_string(self._row, self._col + 5, column['is_nullable'], self._border)
+            self._worksheet.write_string(self._row, self._col + 6, column['extra'], self._border)
             self._row += 1
         self._row += 2
 
