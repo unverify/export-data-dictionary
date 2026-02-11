@@ -8,14 +8,18 @@ class MyWorksheet(Worksheet):
     write_string() method.
     """
 
-    def excel_string_width(self, str):
+    def __init__(self):
+        super().__init__()
+        self.max_column_widths = {}
+
+    def excel_string_width(self, text):
         """
         Calculate the length of the string in Excel character units. This is only
         an example and won't give accurate results. It will need to be replaced
         by something more rigorous.
 
         """
-        string_width = len(str)
+        string_width = len(text)
         return string_width * 1.1
 
     @convert_cell_args
@@ -44,20 +48,17 @@ class MyWorksheet(Worksheet):
 
 
 class ExportDataDictionary(Workbook):
-
     def __init__(self, filename: str):
         super().__init__(filename)
         self._worksheet: Worksheet = None
-        self._bold = self.add_format({'bold': 1, 'border': 1})
-        self._border = self.add_format({'border': 1})
+        self._bold = self.add_format({"bold": 1, "border": 1})
+        self._border = self.add_format({"border": 1})
         self._row = 0
         self._col = 0
 
-    def add_worksheet(self, name=None):
+    def add_worksheet(self, name=None, worksheet_class=None):
         # Overwrite add_worksheet() to create a MyWorksheet object.
-        # Also add an Worksheet attribute to store the column widths.
-        worksheet = super().add_worksheet(name, MyWorksheet)
-        worksheet.max_column_widths = {}
+        worksheet = super().add_worksheet(name, worksheet_class or MyWorksheet)
         return worksheet
 
     def close(self):
@@ -76,40 +77,42 @@ class ExportDataDictionary(Workbook):
         self._row += 1
 
     def create_table(self, table_name: str, schema: list):
-        self._worksheet.write_string(self._row, self._col, 'Table:', self._bold)
-        self._worksheet.write_string(self._row, self._col+1, table_name, self._bold)
+        self._worksheet.write_string(self._row, self._col, "Table:", self._bold)
+        self._worksheet.write_string(self._row, self._col + 1, table_name, self._bold)
         self._row += 1
-        self._worksheet.write_string(self._row, self._col, 'Description:', self._bold)
+        self._worksheet.write_string(self._row, self._col, "Description:", self._bold)
         self._row += 1
-        self.write_header(['COLUMN_ID', 'COLUMN_NAME', 'DESCRIPTION', 'DATA_TYPE', 'DATA_LENGTH', 'NULLABLE', 'Key Type'])
+        self.write_header(
+            ["COLUMN_ID", "COLUMN_NAME", "DESCRIPTION", "DATA_TYPE", "DATA_LENGTH", "NULLABLE", "Key Type"]
+        )
         for index, column in enumerate(schema):
             self._worksheet.write_string(self._row, self._col, str(index + 1), self._border)
-            self._worksheet.write_string(self._row, self._col + 1, column['column_name'], self._border)
-            self._worksheet.write_string(self._row, self._col + 2, column['column_comment'], self._border)
-            self._worksheet.write_string(self._row, self._col + 3, column['column_type'], self._border)
-            self._worksheet.write_string(self._row, self._col + 4, str(column['max_length']), self._border)
-            self._worksheet.write_string(self._row, self._col + 5, column['is_nullable'], self._border)
-            self._worksheet.write_string(self._row, self._col + 6, column['extra'], self._border)
+            self._worksheet.write_string(self._row, self._col + 1, column["column_name"], self._border)
+            self._worksheet.write_string(self._row, self._col + 2, column["column_comment"], self._border)
+            self._worksheet.write_string(self._row, self._col + 3, column["column_type"], self._border)
+            self._worksheet.write_string(self._row, self._col + 4, str(column["max_length"]), self._border)
+            self._worksheet.write_string(self._row, self._col + 5, column["is_nullable"], self._border)
+            self._worksheet.write_string(self._row, self._col + 6, column["extra"], self._border)
             self._row += 1
         self._row += 2
 
     def generate_xlsx_simple(self, data: dict):
-        self._worksheet: Worksheet = self.add_worksheet(name='Data Dictionary')
+        self._worksheet: Worksheet = self.add_worksheet(name="Data Dictionary")
         for table_name, schema in data.items():
-            print(f'Generating {table_name}...')
+            print(f"Generating {table_name}...")
             self.create_table(table_name, schema)
         self.close()
 
     def generate_xlsx(self, data: dict):
-        next_app = ''
+        next_app = ""
         for table_name, schema in data.items():
-            table_name_raw = table_name.split('_')
+            table_name_raw = table_name.split("_")
             app_name = table_name_raw[0]
             if next_app != app_name:
                 self._worksheet: Worksheet = self.add_worksheet(name=app_name)
                 self._row = 0
                 self._col = 0
                 next_app = app_name
-            print(f'Generating app_name={app_name} {table_name}...')
+            print(f"Generating app_name={app_name} {table_name}...")
             self.create_table(table_name, schema)
         self.close()

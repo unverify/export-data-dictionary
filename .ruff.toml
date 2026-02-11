@@ -1,0 +1,10 @@
+target-version = "py311"
+line-length = 120
+
+[lint]
+select = ["E", "F", "I", "W", "UP", "S", "B"]
+ignore = ["S608"]
+
+[lint.per-file-ignores]
+"configs.py.default" = ["S105"]
+"tests/**" = ["S101", "S106"]

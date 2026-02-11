@@ -1,0 +1,42 @@
+[project]
+name = "export-data-dictionary"
+version = "0.2.0"
+description = "Export database schema to XLSX data dictionary"
+requires-python = ">=3.11"
+dependencies = [
+    "mysqlclient>=2.1.1",
+    "pyodbc>=5.2.0",
+    "xlsxwriter>=3.0.8",
+]
+
+[dependency-groups]
+dev = [
+    "pylint",
+    "pytest>=8.0",
+    "openpyxl>=3.1.0",
+]
+
+[tool.pylint.main]
+extension-pkg-allow-list = ["pyodbc"]
+ignored-modules = ["configs"]
+
+[tool.pylint."messages control"]
+disable = [
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "too-many-arguments",
+    "too-many-positional-arguments",
+    "duplicate-code",
+    "redefined-outer-name",
+    "protected-access",
+    "use-implicit-booleaness-not-comparison",
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v --tb=short"

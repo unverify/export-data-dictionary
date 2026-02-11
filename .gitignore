@@ -1,4 +1,9 @@
 *.pyc
+__pycache__/
+*.egg-info/
 *.xlsx
 .venv
+.env
+.python-version
+.DS_Store
 configs.py
