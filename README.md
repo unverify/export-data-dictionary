@@ -47,6 +47,20 @@ docker build -t export-data-dictionary .
 docker run -v $(pwd):/app export-data-dictionary
 ```
 
+To test network connectivity to the database host:
+
+```bash
+docker run -v $(pwd):/app export-data-dictionary uv run python -c \
+  "import socket; from configs import mssql_config; s=socket.create_connection((mssql_config['db_host'], mssql_config.get('db_port', 1433)), timeout=5); print('Connection successful'); s.close()"
+```
+
+To test database authentication:
+
+```bash
+docker run -v $(pwd):/app export-data-dictionary uv run python -c \
+  "from configs import mssql_config; from mssql_connector import MSSQLConnector; MSSQLConnector(**mssql_config)"
+```
+
 ## Development
 
 Development and testing use Docker — no database drivers or system libraries needed on your machine.
